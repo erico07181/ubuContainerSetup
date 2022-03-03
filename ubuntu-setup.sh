@@ -1,23 +1,34 @@
-#!/bin/sh 
+#! /bin/bash
+apt-get update && apt-get install vim
+apt-get remove docker docker-engine docker.io containerd runc
 apt-get update
-apt-get upgrade
-apt install apt-transport-https curl
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+apt-get install \
+	ca-certificates \
+	curl \
+	gnupg \
+	lsb-release
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
-echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" >> ~/kubernetes.list
-sudo mv ~/kubernetes.list /etc/apt/sources.list.d
+echo \
+	"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-apt update
-apt install kubelet
-apt install kubeadm
-apt install kubectl
-apt-get install -y kubernetes-cri
-apt-get install -y kubelet kubeadm kubectl kubernetes-cni
-swapoff -a
-
-cat <<EOF | tee /etc/docker/daemon.json
-{ "exec-opts": ["native.cgroupdriver=systemd"],
-}
+apt-get update
+apt-get install docker-ce docker-ce-cli containerd.io
+apt-get update && apt-get install -y apt-transport-https curl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
+apt-get update
+apt-get install -y kubelet kubeadm kubectl
+apt-mark hold kubelet kubeadm kubectl
+apt install make
+snap install go --classic
+apt install gcc
 
-
+echo "{
+	\"exec-opts\":  [\"native.cgroupdriver=systemd\"]
+}" > /etc/docker/daemon.json
+systemctl daemon-reload
+systemctl restart docker
