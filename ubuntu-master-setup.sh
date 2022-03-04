@@ -16,6 +16,15 @@ echo \
 apt-get update
 apt-get install docker-ce docker-ce-cli containerd.io
 apt-get update && apt-get install -y apt-transport-https curl
+
+
+echo "{
+	\"exec-opts\":  [\"native.cgroupdriver=systemd\"]
+}" > /etc/docker/daemon.json
+systemctl daemon-reload
+systemctl restart docker
+
+
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
 deb https://apt.kubernetes.io/ kubernetes-xenial main
@@ -27,8 +36,12 @@ apt install make
 snap install go --classic
 apt install gcc
 
-echo "{
-	\"exec-opts\":  [\"native.cgroupdriver=systemd\"]
-}" > /etc/docker/daemon.json
-systemctl daemon-reload
-systemctl restart docker
+wget https://github.com/kubeedge/kubeedge/releases/download/v1.9.1/keadm-v1.9.1-linux-amd64.tar.gz
+tar -xvsf keadm-v1.9.1-linux-amd64.tar.gz
+
+
+
+
+
+
+
