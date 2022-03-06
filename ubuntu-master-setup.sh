@@ -17,6 +17,8 @@ apt-get update
 apt-get install docker-ce docker-ce-cli containerd.io
 apt-get update && apt-get install -y apt-transport-https curl
 
+swapoff -a
+curl https://docs.projectcalico.org/manifests/calico-typha.yaml -o calico.yam
 
 echo "{
 	\"exec-opts\":  [\"native.cgroupdriver=systemd\"]
